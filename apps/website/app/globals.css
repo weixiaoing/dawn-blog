@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@plugin "daisyui"{
+  themes: light --default, dark --prefersdark;
+}
+:root {
+  --theme-color: rgb(51, 180, 200);
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  outline: none;
+  list-style: none;
+}
+/* src/index.css */
+
+body {
+  margin: 0;
+  /* place-items: center; */
+  /* width: max(400px, 90vw); */
+  min-height: 100vh;
+  margin: 0 auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 4px;
+  margin-left: 1px;
+  /* width: 0; */
+}
+
+/* Track */
+/* ::-webkit-scrollbar-track {
+  background: #451d1d;
+} */
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

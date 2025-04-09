@@ -1,0 +1,19 @@
+.codeBlock {
+  background-color: #282c34;
+  color: #61dafb;
+  padding: 10px;
+  border-radius: 5px;
+  margin: 10px;
+  height: 200px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+code {
+  @apply bg-blue-500/20 px-1;
+  border-radius: 0.4rem;
+}
+code::before,
+code::after {
+  display: none;
+}

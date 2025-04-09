@@ -1,0 +1,8 @@
+.BubbleMenu {
+  .is-active {
+    @apply text-blue-400;
+  }
+  button {
+    @apply hover:bg-black/10 rounded-sm p-1;
+  }
+}
