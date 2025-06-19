@@ -1,4 +1,4 @@
-import request from "./request";
+import request, { Get } from "./request";
 
 const baseUrl = import.meta.env.VITE_API_URL;
 export async function findFiles() {
@@ -12,4 +12,12 @@ export async function findFiles() {
 
 export async function deleteFile(_id: string) {
   return request("file/delete", { _id }, "delete");
+}
+
+export async function checkFile(hash: string, name: string) {
+  return Get("file/check", { hash, name });
+}
+
+export async function renameFile(_id: string, name: string) {
+  return request("file/rename", { _id, name });
 }

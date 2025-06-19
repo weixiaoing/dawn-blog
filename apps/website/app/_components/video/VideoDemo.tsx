@@ -14,17 +14,20 @@ import {
   useState,
   VideoHTMLAttributes,
 } from "react"
-import useMedia from "../_hooks/useMedia"
-import { Select, Space } from "antd"
+import useMedia from "../../_hooks/useMedia"
+import { Input, Select, Space } from "antd"
 import Button from "../UI/button"
-import useSocket from "../_hooks/useSocket"
+import useSocket from "../../_hooks/useSocket"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useRoom } from "../providers/VideoProvider"
 
 import useMediaStream from "use-media-stream"
 import VideoPlayer from "./VideoPlayer"
 import { Socket } from "socket.io-client"
-import { useSession } from "next-auth/react"
+import { useSession } from "@/utils/auth-client"
+import { AiOutlineSend } from "react-icons/ai"
+import Avatar from "../UI/avatar"
+import dayjs from "dayjs"
 
 // 房间人数超过5人 延迟显著变高
 const MAX_USER = 5
@@ -48,6 +51,17 @@ const VideoDemo = () => {
   const session = useSession()
   const room = useRoom()
   const socket = useSocket()
+  const [content, setContent] = useState("")
+  const [CommentList, setCommentList] = useState<
+    {
+      sender: string
+      content: string
+      name: string
+      avatar: string
+      time: string
+    }[]
+  >([])
+  const [CommentShow, setCommentShow] = useState(false)
   // users管理用户信息以及流
   const [users, setUsers] = useAtom(usersAtom)
   //管理连接
@@ -198,9 +212,7 @@ const VideoDemo = () => {
     avatar: string
     id: string
   }) => {
-    console.log("handleOffer", data)
     createUsers(data.sender, data.name, data.avatar, data.id)
-
     const pc = createPeerConnection(socket, data.sender)
     if (!pc) return
     await pc.setRemoteDescription(new RTCSessionDescription(data.sdp))
@@ -232,10 +244,6 @@ const VideoDemo = () => {
     state: boolean
     sender: string
   }) => {
-    console.log("handle Change")
-
-    console.log(data)
-
     setUsers((prev) => {
       const newMap = new Map(prev)
       newMap.set(data.sender, {
@@ -259,6 +267,16 @@ const VideoDemo = () => {
     })
   }
 
+  const handleMessage = (data: {
+    content: string
+    name: string
+    avatar: string
+    time: string
+    sender: string
+  }) => {
+    setCommentList((prev) => [...prev, data])
+  }
+
   // 房间媒体流交换
   useEffect(() => {
     if (!socket || !localStream) return
@@ -269,6 +287,7 @@ const VideoDemo = () => {
     socket.on("join", handleJoin)
     socket.on("left", handleLeft)
     socket.on("change", handleChange)
+    socket.on("message", handleMessage)
     socket.emit("join", {
       target: room,
       name: session.data?.user?.name,
@@ -283,15 +302,16 @@ const VideoDemo = () => {
       socket.off("join", handleJoin)
       socket.off("left", handleLeft)
       socket.off("change", handleChange)
+      socket.off("message", handleMessage)
       peerConnections.current.forEach((pc) => pc.close())
       socket.close()
     }
   }, [socket, localStream])
 
   return (
-    <div className="max-[1200px mx-auto]">
-      <div className="flex gap-2  ">
-        <div className="flex gap-2 h-[800px] w-full   mx-auto">
+    <>
+      <div className="flex gap-2">
+        <div className="flex gap-2 h-[600px] w-full mx-auto">
           {/* 主屏幕视频流 */}
           <main className="flex-1 bg-black  overflow-hidden  flex items-center justify-center object-fill">
             <VideoPlayer
@@ -339,90 +359,137 @@ const VideoDemo = () => {
           </section>
         </div>
         {/* 评论区 */}
-        {/* {CommentShow && (
-          <div className="flex flex-col gap-2 w-[400px] bg-gray-400/5  p-2">
-            <h1>评论区</h1>
-            <ul>
-              {CommentList.map((item) => (
-                <li key={item.id}>{item.content}</li>
+        {CommentShow && (
+          <div
+            className={clsx(
+              "flex flex-none flex-col gap-2 border p-2  w-[400px]  pt-1 overflow-hidden"
+            )}
+          >
+            <h2>评论区</h2>
+            <ul className="flex-1">
+              {CommentList?.map((item) => (
+                <div key={item.time} className="flex space-y-4 gap-2">
+                  <div className="self-end">
+                    <Avatar
+                      src={item.avatar}
+                      alt={item.name}
+                      className="size-2"
+                    />
+                  </div>
+                  <div className="flex-1 ">
+                    <header className=" flex gap-4 items-center ">
+                      <span className=" font-semibold">{item.name}</span>
+                    </header>
+                    <main className=" bg-zinc-200/50 relative  dark:bg-zinc-600/80 inline-block  rounded-lg rounded-tl-sm p-2 px-3 py-[1px] text-zinc-800 dark:text-zinc-200">
+                      <div>{item.content}</div>
+                    </main>
+                  </div>
+                </div>
               ))}
             </ul>
+            <div className="w-full flex gap-2">
+              <Input
+                value={content}
+                onChange={(v) => {
+                  setContent(v.target.value)
+                }}
+                className="border"
+                type="text"
+              />
+              <Button
+                onClick={() => {
+                  socket?.emit("message", {
+                    sender: session.data?.user?.id,
+                    target: room,
+                    content,
+                    name: session.data?.user?.name,
+                    avatar: session.data?.user?.image,
+                    time: new Date().toLocaleString(),
+                  })
+                  setContent("")
+                }}
+              >
+                <AiOutlineSend />
+              </Button>
+            </div>
           </div>
-        )} */}
+        )}
       </div>
       {/* 工具栏 */}
 
-      <Button
-        border
-        onClick={() => {
-          socket?.emit("change", {
-            target: room,
-            type: "video",
-            state: isVideoMuted,
-          })
-          isVideoMuted ? unmuteVideo() : muteVideo()
-        }}
-      >
-        {isVideoMuted ? "开启视频" : "关闭视频"}
-      </Button>
-      <Button
-        border
-        onClick={() => {
-          isAudioMuted ? unmuteAudio() : muteAudio()
-          socket?.emit("change", {
-            target: room,
-            type: "audio",
-            state: isAudioMuted,
-          })
-        }}
-      >
-        {isAudioMuted ? "开启麦克风" : "关闭麦克风"}
-      </Button>
-      {/* 切换麦克风 */}
-      <Select
-        value={selectedAudioTrackDeviceId}
-        options={audioDevices.map((v) => ({
-          label: v.label,
-          value: v.deviceId,
-        }))}
-        onChange={(v) => {
-          // 切换设备时,如果不重启,当前选择设备不会变化
-          updateMediaDeviceConstraints({
-            constraints: {
-              audio: {
-                deviceId: v,
+      <div>
+        <Button
+          border
+          onClick={() => {
+            socket?.emit("change", {
+              target: room,
+              type: "video",
+              state: isVideoMuted,
+            })
+            isVideoMuted ? unmuteVideo() : muteVideo()
+          }}
+        >
+          {isVideoMuted ? "开启视频" : "关闭视频"}
+        </Button>
+        <Button
+          border
+          onClick={() => {
+            isAudioMuted ? unmuteAudio() : muteAudio()
+            socket?.emit("change", {
+              target: room,
+              type: "audio",
+              state: isAudioMuted,
+            })
+          }}
+        >
+          {isAudioMuted ? "开启麦克风" : "关闭麦克风"}
+        </Button>
+        {/* 切换麦克风 */}
+        <Select
+          value={selectedAudioTrackDeviceId}
+          options={audioDevices.map((v) => ({
+            label: v.label,
+            value: v.deviceId,
+          }))}
+          onChange={(v) => {
+            // 切换设备时,如果不重启,当前选择设备不会变化
+            updateMediaDeviceConstraints({
+              constraints: {
+                audio: {
+                  deviceId: v,
+                },
               },
-            },
-            resetStream: true,
-          })
-        }}
-      ></Select>
-      <Select
-        value={selectedVideoTrackDeviceId}
-        options={videoDevices.map((v) => ({
-          label: v.label,
-          value: v.deviceId,
-        }))}
-        onChange={(v) => {
-          updateMediaDeviceConstraints({
-            constraints: {
-              video: {
-                deviceId: v,
+              resetStream: true,
+            })
+          }}
+        ></Select>
+        <Select
+          value={selectedVideoTrackDeviceId}
+          options={videoDevices.map((v) => ({
+            label: v.label,
+            value: v.deviceId,
+          }))}
+          onChange={(v) => {
+            updateMediaDeviceConstraints({
+              constraints: {
+                video: {
+                  deviceId: v,
+                },
               },
-            },
-            resetStream: true,
-          })
-        }}
-      ></Select>
-      {/* <Button
-        border
-        onClick={() => {
-          setCommentShow((v) => !v)
-        }}
-      >
-        评论
-      </Button> */}
-    </div>
+              resetStream: true,
+            })
+          }}
+        ></Select>
+        <Button
+          border
+          onClick={() => {
+            setCommentShow((v) => !v)
+          }}
+        >
+          评论
+        </Button>
+      </div>
+    </>
   )
 }
 

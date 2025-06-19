@@ -4,40 +4,31 @@ import { BsCodeSlash, BsImageFill, BsTypeH1, BsTypeH2, BsTypeH3 } from "react-ic
 
 import { createSuggestionsItems } from "@harshtalks/slash-tiptap";
 const suggestions = createSuggestionsItems([
-  // {
-  //   title: "Text",
-  //   searchTerms: ["paragraph"],
-  //   command: ({ editor, range }) => {
-  //     editor
-  //       .chain()
-  //       .focus()
-  //       .deleteRange(range)
-  //       .toggleNode("paragraph", "paragraph")
-  //       .run();
-  //   },
-  // },
+  // 有序列表渲染
   {
     icon: <AiOutlineOrderedList />,
     title: "Ordered List",
     searchTerms: ["ordered", "point", "numbers"],
     command: ({ editor, range }) => {
-      editor.chain().focus().deleteRange(range).toggleOrderedList().run();
+      editor.chain().focus().deleteRange(range).toggleOrderedList().run()
     },
   },
+  // 局部代码格式渲染
   {
     icon: <BsCodeSlash />,
     title: "Code",
     searchTerms: ["code"],
     command: ({ editor, range }) => {
-      editor.chain().focus().deleteRange(range).toggleCode().run();
+      editor.chain().focus().deleteRange(range).toggleCode().run()
     },
   },
+  //代码块渲染
   {
     icon: <BiCodeBlock />,
     title: "CodeBlock",
     searchTerms: ["codeblock"],
     command: ({ editor, range }) => {
-      editor.chain().focus().deleteRange(range).toggleCodeBlock().run();
+      editor.chain().focus().deleteRange(range).toggleCodeBlock().run()
     },
   },
   {
@@ -50,7 +41,7 @@ const suggestions = createSuggestionsItems([
         .focus()
         .deleteRange(range)
         .toggleHeading({ level: 1 })
-        .run();
+        .run()
     },
   },
   {
@@ -63,7 +54,7 @@ const suggestions = createSuggestionsItems([
         .focus()
         .deleteRange(range)
         .toggleHeading({ level: 2 })
-        .run();
+        .run()
     },
   },
   {
@@ -76,7 +67,7 @@ const suggestions = createSuggestionsItems([
         .focus()
         .deleteRange(range)
         .toggleHeading({ level: 3 })
-        .run();
+        .run()
     },
   },
   {
@@ -84,11 +75,11 @@ const suggestions = createSuggestionsItems([
     title: "Image",
     searchTerms: ["Image"],
     command: ({ editor, range }) => {
-      const url = window.prompt("Enter the image URL");
+      const url = window.prompt("Enter the image URL")
       if (url)
-        editor.chain().focus().deleteRange(range).setImage({ src: url }).run();
+        editor.chain().focus().deleteRange(range).setImage({ src: url }).run()
     },
   },
-]);
+])
 
 export default suggestions;

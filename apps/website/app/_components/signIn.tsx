@@ -1,18 +1,19 @@
 "use client"
 import clsx from "clsx"
 import { GoSignOut } from "react-icons/go"
-// import { auth, signIn, signOut } from "~/lib/auth"
+
 import Bubble from "./UI/Bubble"
-import { signInWithGitHub, signOut, useSession } from "@/utils/auth-client"
+import {
+  signInWithEmail,
+  signInWithGitHub,
+  signOut,
+  useSession,
+} from "@/utils/auth-client"
 
 const SignIn = ({ className }: { className?: string }) => {
   const { data: session } = useSession()
   const signInHandler = async () => {
-    // const { data, error } = await signInWithGitHub()
-    const data = await fetch(
-      "http://localhost:4000/api/auth/sign-in/social",
-      
-    ).then((res) => res.json())
+    const { data, error } = await signInWithGitHub()
   }
 
   const signOutHandler = async () => {

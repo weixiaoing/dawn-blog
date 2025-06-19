@@ -1,8 +1,10 @@
+
 // routes.js
 import log from "@/common/chalk";
 import express from "express";
 import { OpenAI } from "openai";
 import {
+  addLikes,
   addWatchs,
   createPost,
   deletePost,
@@ -68,7 +70,6 @@ router.post("/findWithPage", (req, res) => {
 
 router.post("/findPost", (req, res) => {
   const props = req.body;
-
   findPost(props)
     .then((data) => {
       res.json({
@@ -146,18 +147,18 @@ router.post("/aiwrite", async (req, res) => {
     const data = await getAi(content);
     res.json({ status: 1, data });
   } catch (error) {
-    log.error(error);
+    log.error(JSON.stringify(error));
   }
 });
 
 
 router.get("/getPost", async (req, res) => {
-  log.info('yes');
+
   const { id } = req.query;
   console.log(req.query);
   getPost(id as string)
     .then((data) => {
-      console.log(data);
+
       res.json({
         status: 1,
         message: "success",
@@ -172,5 +173,41 @@ router.get("/getPost", async (req, res) => {
     })
 }
 )
+
+router.get("/addLikes", (req, res) => {
+  const { id } = req.query;
+  addLikes(id as string)
+    .then((data) => {
+      res.json({
+        code: 1,
+        message: "success",
+        data,
+      });
+    })
+    .catch((error) => {
+      res.json({
+        code: 0,
+        message: error,
+      });
+    });
+});
+
+router.get("/addWatchs", (req, res) => {
+  addWatchs(req.body)
+    .then((data) => {
+      res.json({
+        code: 1,
+        message: "success",
+        data,
+      });
+    })
+    .catch((error) => {
+      res.json({
+        code: 0,
+        message: error,
+      });
+    });
+});
+
 
 export default router;

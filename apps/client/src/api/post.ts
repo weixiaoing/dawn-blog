@@ -17,6 +17,6 @@ export async function createPostAPI() {
 
 export const getList = async () => {
   return request("post/findPostMeta").then((res) => {
-    return res.data;
+    return res?.data;
   });
 };

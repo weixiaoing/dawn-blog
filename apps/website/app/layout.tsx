@@ -1,12 +1,11 @@
 import clsx from "clsx";
 
 import { Theme } from "@radix-ui/themes";
-import type { Metadata } from "next";
-import { SessionProvider } from "next-auth/react";
-import { Montserrat } from "next/font/google";
-import { JotaiProvider } from "./_components/providers/JotaiProvider";
-import "./globals.css";
-import ReactQueryProvider from "./utils/Providers/ReactQueryProvider";
+import type { Metadata } from "next"
+import { Montserrat } from "next/font/google"
+import { JotaiProvider } from "./_components/providers/JotaiProvider"
+import "./globals.css"
+import ReactQueryProvider from "./utils/Providers/ReactQueryProvider"
 
 import "@arco-design/web-react/dist/css/arco.css"
 
@@ -36,9 +35,7 @@ export default function RootLayout({
         <Theme>
           {" "}
           <ReactQueryProvider>
-            <JotaiProvider>
-              <SessionProvider>{children}</SessionProvider>
-            </JotaiProvider>
+            <JotaiProvider>{children}</JotaiProvider>
           </ReactQueryProvider>
         </Theme>
       </body>

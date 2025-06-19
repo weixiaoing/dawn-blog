@@ -212,4 +212,58 @@ export const addWatchs = async (id: string) => {
   }
 }
 
+export const addLikes = async (id: string) => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/post/addLikes/?id=${id}`,
+      {
+        method: "get",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    ).then((res) => res.json());
+    return res.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const getMeeting = async (id: string) => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/meeting/findById/?id=${id}`,
+      {
+        method: "get",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    ).then((res) => res.json());
+    return res.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export const getFiles = async () => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/file/getFiles`,
+      {
+        method: "get",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    ).then((res) => res.json());
+    return res.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
+
+
 

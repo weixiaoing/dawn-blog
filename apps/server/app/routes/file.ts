@@ -66,13 +66,22 @@ router.delete(
   })
 )
 
-router.get("/check", (req, res) => {
-  const { hash, name } = req.query
+router.get("/check", async (req, res) => {
+  const { hash, name } = req.query as { hash: string; name: string };
   //todo check if have this file
-  //
-  let tempFileDir = path.resolve(tempDir, hash as string)
-  const chunkPaths = fse.readdirSync(tempFileDir)
-  chunkPaths.map((chunkPath) => { })
+  const result = await File.findOne({ hash })
+
+  if (result) {
+    await File.create({
+      hash,
+      name,
+      path: result?.path,
+      type: name.split('.').pop()
+    })
+    successResponse(res, true)
+  } else {
+    successResponse(res, false)
+  }
 })
 
 router.get("/merge", async (req, res) => {
@@ -120,10 +129,27 @@ router.get("/merge", async (req, res) => {
 router.get(
   "/getFiles",
   asyncHandler(async (req, res) => {
-    const result = await File.find({}).sort({ createdAt: -1 });
-    successResponse(res, result);
+    try {
+      const result = await File.find().sort({ createdAt: -1 });
+      console.log(result);
+      successResponse(res, result);
+    } catch (error) {
+      log.error(error);
+    }
   })
 );
+
+router.post("/rename",
+  asyncHandler(async (req, res) => {
+    try {
+      const { _id, name } = req.body
+      const result = await File.updateOne({ _id }, { name })
+      successResponse(res, result)
+    } catch (error) {
+      log.error(error);
+    }
+  })
+)
 
 
 

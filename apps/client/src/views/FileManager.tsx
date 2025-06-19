@@ -1,6 +1,8 @@
 import {
   Button,
+  Input,
   message,
+  Modal,
   Popconfirm,
   Table,
   TableColumnsType,
@@ -10,7 +12,7 @@ import {
 import clsx from "clsx"
 import dayjs from "dayjs"
 import { Key, useEffect, useMemo, useRef, useState } from "react"
-import { deleteFile, findFiles } from "../api/file"
+import { deleteFile, findFiles, renameFile } from "../api/file"
 import UploadItem from "../component/upload/UploadItem"
 interface DataType {
   _id: string
@@ -21,14 +23,20 @@ interface DataType {
 }
 
 const FileManager = () => {
+  const [messageApi, contextHolder] = message.useMessage()
   const [data, setData] = useState<DataType[]>()
   const selected = useRef<DataType[]>()
   const [uploadTasks, setUploadTasks] = useState<File[]>()
   const [open, setOpen] = useState(false)
+  const [renameShow, setRenameShow] = useState(false)
   const getFiles = async () => {
     const res = await findFiles()
     setData(res.data)
   }
+  const [rename, setRename] = useState({
+    _id: "",
+    name: "",
+  })
 
   const rowSelection: TableProps<DataType>["rowSelection"] = {
     onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
@@ -49,16 +57,18 @@ const FileManager = () => {
       {
         title: "文件名",
         dataIndex: "name",
-        render: (text: string, data) => (
-          <a download href={data.path}>
-            {text}
-          </a>
-        ),
+        render: (text: string, data) => {
+          return (
+            <a download href={data.path}>
+              {text}
+            </a>
+          )
+        },
       },
       {
-        title: "大小",
-        dataIndex: "size",
-        render: (text: string) => <span>{text || "未知"}</span>,
+        title: "类型",
+        dataIndex: "type",
+        render: (type: string) => <span>{type || "未知"}</span>,
       },
       {
         title: "修改日期",
@@ -71,14 +81,34 @@ const FileManager = () => {
         title: "",
         dataIndex: "",
         render: (text: string, item) => (
-          <span>
+          <span className="flex gap-2">
+            <Button
+              onClick={() => {
+                setRename({
+                  _id: item._id,
+                  name: item.name,
+                })
+                setRenameShow(true)
+              }}
+            >
+              重命名
+            </Button>
             <Button
               onClick={async () => {
                 const res = await deleteFile(item._id)
-                getFiles()
+                await getFiles()
+                messageApi.success("删除成功")
               }}
             >
               删除
+            </Button>
+            <Button
+              onClick={async () => {
+                window.navigator.clipboard.writeText(item.path)
+                messageApi.success("复制成功")
+              }}
+            >
+              分享
             </Button>
           </span>
         ),
@@ -91,6 +121,30 @@ const FileManager = () => {
   }, [])
   return (
     <div>
+      {contextHolder}
+      <Modal
+        title="重命名"
+        open={renameShow}
+        onOk={async () => {
+          const res = await renameFile(rename._id, rename.name)
+          if (res.code == 1) {
+            await getFiles()
+            messageApi.success("重命名成功")
+            setRenameShow(false)
+          }
+        }}
+        onClose={() => {
+          setRenameShow(false)
+        }}
+        onCancel={() => {
+          setRenameShow(false)
+        }}
+      >
+        <Input
+          value={rename.name}
+          onChange={(e) => setRename({ ...rename, name: e.target.value })}
+        ></Input>
+      </Modal>
       <header className="flex gap-4">
         <Upload
           showUploadList={false}
@@ -99,7 +153,7 @@ const FileManager = () => {
             const item = file.file as File
             if (!item) return
             setUploadTasks((pre) => {
-              return [...(pre || []), item]
+              return [item, ...(pre || [])]
             })
             setOpen(true)
           }}
@@ -117,7 +171,6 @@ const FileManager = () => {
                 return deleteFile(item._id)
               }) || []
             )
-
               .then(getFiles)
               .then(() => message.success("删除成功"))
           }}
@@ -127,7 +180,15 @@ const FileManager = () => {
         >
           <Button danger>删除</Button>
         </Popconfirm>
-        {/* <Button>新建文件夹</Button> */}
+
+        <Button>新建文件夹</Button>
+        <Button
+          onClick={() => {
+            setOpen(true)
+          }}
+        >
+          上传列表
+        </Button>
       </header>
       <section className="h-full mb-20 space-y-4 pt-4">
         <Table<DataType>
@@ -139,7 +200,7 @@ const FileManager = () => {
       </section>
       <div
         className={clsx(
-          "fixed flex flex-col top-4 right-[10%] w-[700px] bg-white shadow-md border-black/5 border h-[400px] p-2 ",
+          "fixed rounded-md flex flex-col top-4 right-[10%] w-[700px] bg-white shadow-md border-black/5 border h-[400px] p-2 ",
           !open && "hidden"
         )}
       >

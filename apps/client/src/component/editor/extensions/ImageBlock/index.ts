@@ -3,9 +3,7 @@ import { ReactNodeViewRenderer } from "@tiptap/react";
 import { ImageBlockView } from "./components/ImageBlockView";
 import { Image as BaseImage } from "@tiptap/extension-image";
 
-export const Image = BaseImage.extend({
-  group: "block",
-});
+
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -21,7 +19,7 @@ declare module "@tiptap/core" {
   }
 }
 
-export const ImageBlock = Image.extend({
+export const ImageBlock = BaseImage.extend({
   name: "imageBlock",
   group: "block",
   defining: true,
@@ -29,6 +27,20 @@ export const ImageBlock = Image.extend({
   draggable: true,
   addAttributes() {
     return {
+      uploading: {
+        default: false,
+        parseHTML: element => element.getAttribute('data-uploading'),
+        renderHTML: attributes => ({
+          'data-uploading': attributes.uploading,
+        }),
+      },
+      placeholder: {
+        default: false,
+        parseHTML: element => element.getAttribute('data-placeholder'),
+        renderHTML: attributes => ({
+          'data-placeholder': attributes.placeholder,
+        }),
+      },
       src: {
         default: "",
         parseHTML: (element) => element.getAttribute("src"),
@@ -70,7 +82,7 @@ export const ImageBlock = Image.extend({
   parseHTML() {
     return [
       {
-        tag: 'img[src*="tiptap.dev"]:not([src^="data:"]), img[src*="windows.net"]:not([src^="data:"])',
+        tag: 'img',
       },
     ];
   },
@@ -84,6 +96,7 @@ export const ImageBlock = Image.extend({
 
   addCommands() {
     return {
+      ...this.parent?.(),
       setImageBlock:
         (attrs) =>
           ({ commands }) => {

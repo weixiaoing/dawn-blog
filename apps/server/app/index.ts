@@ -13,6 +13,7 @@ import postRouter from "./routes/post";
 import summryRouter from "./routes/summary";
 import talkRotuer from "./routes/talk";
 import imageRouter from "./routes/image"
+import commentRouter from "./routes/comment"
 import ICEServerHandlers from "./socket/ICEserver";
 import userHandlers from "./socket/userHandler";
 import admin from "./routes/admin"
@@ -23,25 +24,31 @@ const server = new http.Server(app);
 const PORT = env.SERVER_PORT || 4000;
 // socket端口
 const SOCKETPORT = env.SOCKET_PORT || 4040;
+
+const corsOptions = {
+  origin: ['http://localhost:3000', 'http://localhost:5173'], // 替换为前端实际域名
+  credentials: true, // 允许携带凭证（如 cookies）
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // 允许的请求方法
+  allowedHeaders: ['Content-Type', 'Authorization'] // 允许的请求头
+};
+app.use(cors(corsOptions));
 const socketIO = new Server(SOCKETPORT as number, {
-  cors: {
+  cors:
+  {
     origin: "*",
-  },
+  }
+
 });
 
-app.use(cors({
-  origin: "*", // Replace with your frontend's origin
-  methods: ["GET", "POST", "PUT", "DELETE"], // Specify allowed HTTP methods
-  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
-}));
-app.all("/api/auth/*", toNodeHandler(auth));
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
 app.use((req, res, next) => {
   log.info(`[${new Date().toISOString()}] ${req.method} ${req.url}`)
   next()
 })
-app.get("/", (req, res) => {
+app.all("/api/auth/*", toNodeHandler(auth));
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.get("/isAlive", (req, res) => {
   res.json({
     message: "Hello !",
   })
@@ -56,6 +63,7 @@ app.use("/talk", talkRotuer)
 app.use("/meeting", meetingRouter)
 app.use("/image", imageRouter)
 app.use("/admin", admin)
+app.use("/comment", commentRouter)
 app.use(errorHandler)
 // 404 处理
 app.use((req, res) => {

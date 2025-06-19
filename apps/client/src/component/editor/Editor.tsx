@@ -30,7 +30,9 @@ const extensions = [
       items: () => suggestions,
     },
   }),
-  ImageBlock,
+  // ImageBlock.configure({
+  //   allowBase64: true,
+  // }),
   Highlight,
   TaskItem,
   TaskList,
@@ -82,7 +84,6 @@ const extensions = [
 ]
 // const markdownoutpub=editor.storage.markdown.getMarkdown();
 const Editor = (props: EditorProviderProps) => {
-
   return (
     <div className="container shadow-md p-2 relative flex flex-col flex-1 h-full overflow-hidden ">
       <SlashCmdProvider>
@@ -93,7 +94,8 @@ const Editor = (props: EditorProviderProps) => {
               keydown: (_, v) => enableKeyboardNavigation(v),
             },
             attributes: {
-              class: "m-h-full prose mx-auto max-w-full focus:outline-none  [&>*]:my-2",
+              class:
+                "m-h-full md-render prose mx-auto max-w-full focus:outline-none [&>*]:my-2",
             },
           }}
           autofocus
@@ -104,6 +106,6 @@ const Editor = (props: EditorProviderProps) => {
         </EditorProvider>
       </SlashCmdProvider>
     </div>
-  );
-};
+  )
+}
 export default Editor;

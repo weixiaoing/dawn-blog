@@ -16,9 +16,7 @@ const UploadItem = ({
   const uploadRef = useRef<InstanceType<typeof Uploader>>();
   useEffect(() => {
     uploadRef.current = new Uploader(file, ({ percentage, status }) => {
-      console.log(percentage, status)
       if (status === "completed") {
-        console.log("finish")
         onfinish()
       }
       setPercentage(percentage || 0)
@@ -31,8 +29,8 @@ const UploadItem = ({
       <header>{file.name}</header>
       <Progress percent={percentace} />
       <footer className="flex gap-4">
-        <Button onClick={() => uploadRef.current?.pause()}>开始</Button>
-        <Button onClick={() => uploadRef.current?.resume()}>暂停</Button>
+        <Button onClick={() => uploadRef.current?.resume()}>开始</Button>
+        <Button onClick={() => uploadRef.current?.pause()}>暂停</Button>
       </footer>
     </div>
   )

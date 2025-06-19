@@ -5,21 +5,9 @@ import openai from "../config";
 export const dynamic = "force-dynamic";
 export const POST = async (req: NextRequest) => {
   const { postId, content, language } = await req.json();
-
-  const text = content as string;
-  const lang = language || ("zh" as string);
-  const sqlResult = await getSummary(postId);
-  console.log("summaryData", sqlResult);  
-
-  let summary = "";
-  // 查询数据库中是否有summary
-
-  if (sqlResult.data.length > 0) {
+  const sucessResponse = (data) => {
     return new Response(
-      JSON.stringify({
-        summary: sqlResult.data[0]?.content,
-        source: "db-cache",
-      }),
+  JSON.stringify(data),
       {
         status: 200,
         headers: {
@@ -27,6 +15,20 @@ export const POST = async (req: NextRequest) => {
         },
       }
     );
+  }
+  
+  const text = content as string; //文章内容
+  const lang = language || ("zh" as string); //语言
+  const sqlResult = await getSummary(postId);//查询是否有对应摘要记录
+
+  let summary = "";
+
+  //没有摘要记录就选择重新请求摘要
+  if (sqlResult.data.length > 0) {
+    sucessResponse({
+      summary: sqlResult.data[0]?.content,
+      source: "db-cache",
+    })
   }
   const completion = await openai.chat.completions.create({
     messages: [
@@ -40,9 +42,8 @@ CONCISE SUMMARY:`,
     ],
     model: "gpt-3.5-turbo",
   });
-
+  //不存在重新让AI进行摘要,插入数据库中
   summary = completion.choices[0].message.content!;
-
   //  插入数据库
   await createSummary(postId, summary);
 

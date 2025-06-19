@@ -1,29 +1,24 @@
-import { Button } from "antd";
-import dayjs from "dayjs";
+import { Button, message } from "antd"
+import dayjs from "dayjs"
 import { useEffect, useState } from "react"
-import { deleteMeeting, getMeeting } from "../../api/meeting"
+import { deleteMeeting, getAdminMeeting, getMeeting } from "../../api/meeting"
+import { MeetingType } from "../../type/Meeting"
 
 export default function MeetingSchedule() {
-  const [meetings, setMeetings] = useState([])
+  const [meetings, setMeetings] = useState<MeetingType[]>([])
   useEffect(() => {
-    getMeeting().then((res) => {
-      const data = res.data.data
-      setMeetings(data)
-      console.log(data)
+    getAdminMeeting().then((res) => {
+      const data = res.data
+      if (res.code === 1) setMeetings(data)
     })
   }, [])
-  const deleteMeet = async (id) => {
-    const res = await deleteMeeting(id)
-    if (res.code != 1) return
-    setMeetings((v) => v.filter((item) => item._id !== id))
+  const copyMeetingLink = async (str: string) => {
+    const link = `http://localhost:3000/video/${str}`
+    await navigator.clipboard.writeText(link)
+    message.success("已复制会议链接")
   }
   return (
     <div className="h-full flex flex-col  ">
-      {/* <h2>{dayjs().format("M月D日")}</h2>
-      <section className="flex items-center justify-between">
-        <span>{dayjs().format("dddd")}</span>
-        <Button>全部会议</Button>
-      </section> */}
       <ul className="overflow-auto ">
         {meetings.map((item) => {
           return (
@@ -33,27 +28,34 @@ export default function MeetingSchedule() {
             >
               <div className="flex-1">
                 <h3>{item.title}</h3>
-                <h4>{dayjs(item.startTime).format("M月D日")}</h4>
+                <h4>{dayjs(item.createdAt).format("M月D日")}</h4>
                 <span className="text-gray-400  text-sm">
-                  {dayjs(item.startTime).format("HH:mm")}-
+                  {dayjs(item.createdAt).format("HH:mm")}-
                   {dayjs(
-                    new Date(item.startTime).valueOf() + item.duration
+                    new Date(item.createdAt).valueOf() + item.duration
                   ).format("HH:mm")}
                 </span>
               </div>
               <div className="w-[100px] space-y-2">
                 <Button
                   onClick={() => {
-                    window.location.href = `http://localhost:3000//video/${item._id}`
+                    window.open(
+                      `http://localhost:3000/video/${item._id}`,
+                      "_blank",
+                      "noopener,noreferrer"
+                    )
                   }}
                 >
                   加入会议
                 </Button>
-                <Button onClick={() => deleteMeet(item._id)}>取消会议</Button>
+                <Button onClick={() => copyMeetingLink(item._id)}>
+                  分享会议
+                </Button>
               </div>
             </li>
           )
         })}
+        {meetings.length === 0 && <h3>暂无会议</h3>}
       </ul>
     </div>
   )

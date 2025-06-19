@@ -69,16 +69,14 @@ export class Uploader {
     return chunks;
   }
   async start() {
-    console.log("start");
-    console.log(this);
+// 分片数量
     const len = this.chunks.length;
+    // 循环查找是否有剩余切片需要上传
     while (
       this.finishedCount < len &&
       this.limit > 0 &&
       this.status === "uploading"
     ) {
-      console.log(this.finishedCount);
-
       this.limit--;
       const chunk = this.chunks.find((item) => item.status === "waiting");
       if (!chunk) continue;
@@ -88,6 +86,7 @@ export class Uploader {
           chunk.status = "success";
           this.limit++;
           this.finishedCount++;
+          // 上传完成后上传其他切片
           this.start();
           this.onProgress?.(
             "uploading...",

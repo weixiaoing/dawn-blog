@@ -4,8 +4,8 @@ export interface BlogData {
   tags: string[];
   summary: string;
   status: string;
-  watched: Number;
-  like: Number;
+  watched: number;
+  like: number;
   password?: string;
   date: string;
   cover: string;

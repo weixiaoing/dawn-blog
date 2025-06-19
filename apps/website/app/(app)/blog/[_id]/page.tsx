@@ -3,19 +3,20 @@ import Chat from "@/_components/comment/Chat";
 import Editor from "@/_components/Editor";
 import Toc from "@/_components/Toc";
 import Card from "@/_components/UI/card";
-import { getPost } from "@/utils";
-import dayjs from "dayjs";
-import "highlight.js/styles/atom-one-dark.css";
-import { AiOutlineClockCircle } from "react-icons/ai";
-import Tool from "./Tool";
+import { addLikes, getPost } from "@/utils"
+import dayjs from "dayjs"
+import "highlight.js/styles/atom-one-dark.css"
+import { AiOutlineClockCircle, AiOutlineLike } from "react-icons/ai"
+import Tool from "./Tool"
+import Button from "@/_components/UI/button"
 export default async function Article({ params }: { params: { _id: string } }) {
   const data = await getPost({
     _id: params._id,
   }).then((res) => {
-    return res.data;
-  });
+    return res.data
+  })
 
-  // if (!data) return null;
+  if (!data) return <div>loading</div>
 
   return (
     <>
@@ -68,10 +69,11 @@ export default async function Article({ params }: { params: { _id: string } }) {
               className="bg-black dark:bg-white my-4 h-[2px] "
               style={{ opacity: 0.3 }}
             />
-            <Tool></Tool>
+
+            <Tool id={params._id}></Tool>
           </div>
         </main>
       </div>
     </>
-  );
+  )
 }

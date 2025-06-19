@@ -9,7 +9,6 @@ const userHandlers = (io, socket) => {
     socket.join("init")
     const members = io.sockets.adapter.rooms.get("init").size
     log.info(socket.id + " 进入了网站\n" + "当前人数:" + members)
-
     socket.to("init").emit("updateMembers", { members })
   })
   socket.on("joinRoom", ({ room }) => {

@@ -5,12 +5,16 @@ import { Checkbox, DatePicker, Form, Input, Select } from "antd"
 import Modal from "@/_components/UI/modal"
 import { createMetting, deleteMeeting, getMeetingList } from "@/utils"
 import dayjs, { Dayjs } from "dayjs"
-import { signIn, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { FaGithub } from "react-icons/fa"
 import { FcGoogle } from "react-icons/fc"
 import FormItem from "antd/es/form/FormItem"
+import {
+  signInWithGitHub,
+  signInWithGoole,
+  useSession,
+} from "@/utils/auth-client"
 
 export interface meeting {
   _id: string
@@ -34,29 +38,30 @@ export default function Video() {
     router.push(`/video/${id}`)
   }
   const getList = async () => {
-    getMeetingList({ page: 1, pageSize: 10,user:session?.user?.id }).then((data) => {
-      setMeetings(data)
-    })
+    getMeetingList({ page: 1, pageSize: 10, user: session?.user?.id }).then(
+      (data) => {
+        setMeetings(data)
+      }
+    )
   }
 
   useEffect(() => {
     getList()
   }, [session?.user?.id])
- 
 
   if (!session?.user) {
     return (
       <div className="flex self-center w-full justify-center">
-        <Card className="w-[400px]" border header="视频通话功能需要用户登录...">
+        <Card className="w-[400px]" border header="使用该功能需要用户登录...">
           <div className="flex justify-center pt-[100px] gap-4">
             <Button
-              onClick={() => signIn("github")}
+              onClick={() => signInWithGitHub()}
               className="border rounded-full"
             >
               <FaGithub size={60} />
             </Button>
             <Button
-              onClick={() => signIn("google")}
+              onClick={() => signInWithGoole()}
               className="border rounded-full"
             >
               <FcGoogle size={60} />

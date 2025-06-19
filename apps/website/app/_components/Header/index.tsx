@@ -4,8 +4,8 @@ import { ScrollTop } from "./ScollTop";
 export function Header() {
   return (
     <header className=" dark:border-none w-full mb-10  ">
-      <ScrollTop />
+      {/* <ScrollTop /> */}
       <Nav></Nav>
     </header>
-  );
+  )
 }

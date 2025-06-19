@@ -62,6 +62,10 @@ export const addWatchs = async (id: string) => {
   return await post.findByIdAndUpdate(id, { $inc: { watched: 1 } });
 }
 
+export const addLikes = async (id: string) => {
+  return await post.findByIdAndUpdate(id, { $inc: { like: 1 } });
+}
+
 export const getPost = async (id: string) => {
   await addWatchs(id);
   return await post.findById(id);

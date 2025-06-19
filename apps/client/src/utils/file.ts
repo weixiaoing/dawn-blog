@@ -1,5 +1,6 @@
 import Worker from "@/utils/worker?worker";
 import { mergeChunk, uploadChunk } from "../api/imageUpload";
+import { checkFile } from "../api/file";
 type Chunk = {
   formData: FormData;
   retries: number;
@@ -55,7 +56,6 @@ export class Uploader {
     return chunks;
   }
   async upload() {
-    console.log("upload");
     const len = this.chunks.length;
     while (
       this.finishedCount < len &&
@@ -92,11 +92,11 @@ export class Uploader {
     }
   }
   pause() {
-    console.log("paused");
+
     this.status = "paused";
   }
   resume() {
-    console.log("resume");
+
     this.status = "uploading";
     this.upload();
   }
@@ -111,6 +111,13 @@ export class Uploader {
     this.status = "uploading";
     this.hash = await this.getHash(file);
     this.chunks = this.createChunk(file);
+    const result = await checkFile(this.hash, this.name)
+    if (result.data == true) {
+      this.status = "completed";
+      this.percentage = 100
+      this.onChange(this);
+      return
+    }
     this.upload();
   }
 }

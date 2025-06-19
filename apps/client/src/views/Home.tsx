@@ -12,7 +12,8 @@ import { Button, Card } from "antd"
 import dayjs from "dayjs"
 import AddMeeting from "../component/MeetingList/addMeeting"
 import { getWebData } from "../api/request"
-
+import Meetingmanage from "../component/MeetingList/Meetingmanage"
+import CommentManage from "../component/Comment/CommentManage"
 export default function Home() {
   const [Info, setInfo] = useState({
     commentCount: 0,
@@ -29,8 +30,6 @@ export default function Home() {
       .then((res) => res.json())
       .then((data) => {
         console.log(data.data.list)
-
-        // setMeetings(data.data.list);
       })
   }, [])
 
@@ -58,10 +57,6 @@ export default function Home() {
           <section className="space-y-2 flex-1 ">
             <h5>{"文章"}</h5>
             <h5>{Info.noteCount}</h5>
-            <footer className="flex gap-2">
-              <Button type="primary">新增</Button>
-              <Button>管理</Button>
-            </footer>
           </section>
           <div className="w-[50px] h-full opacity-70 flex items-center justify-center pr-2">
             <MdOutlineArticle className="size-8" />
@@ -75,23 +70,25 @@ export default function Home() {
               <AddMeeting>
                 <Button type="primary">新增</Button>
               </AddMeeting>
-
-              <Button>管理</Button>
+              <Meetingmanage>
+                <Button>管理</Button>
+              </Meetingmanage>
             </footer>
           </section>
           <div className="w-[50px] h-full opacity-70  flex items-center justify-center pr-2">
             <BsPencil className="size-8" />
           </div>
         </div>
-        <div className="p-2 border rounded-md border-black-500/30  w-[300px] flex ">
-          <section className="space-y-2 flex-1 ">
+        <div className="p-2 border rounded-md border-black-500/30  w-[300px] flex">
+          <section className="space-y-2 flex-1">
             <div className="space-y-2">
               <h5>{"评论"}</h5>
               <h5>{Info.commentCount}</h5>
             </div>
             <footer className="flex gap-2">
-              <Button type="primary">新增</Button>
-              <Button>管理</Button>
+              <CommentManage>
+                <Button>管理</Button>
+              </CommentManage>
             </footer>
           </section>
           <div className="w-[50px] h-full opacity-70 flex items-center justify-center pr-2">
@@ -124,7 +121,7 @@ export default function Home() {
           <section className="space-y-2 flex-1 ">
             <div className="space-y-2 pb-2">
               <h5>{"总阅读量"}</h5>
-              <h5>5</h5>
+              <h5>{Info.watchedCount}</h5>
             </div>
           </section>
           <div className="w-[50px] h-full flex opacity-70 items-center justify-center pr-2">
