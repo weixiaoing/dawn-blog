@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom"
 import { createPostAPI } from "../../api/post"
 import { sideBarOpenedAtom } from "../../store/atom/common"
 import PostMenu from "./PostMenu"
+import ResizeTab from "../ResizeTab"
 
 const MenuItemContainer: FC<
   PropsWithChildren & React.HTMLAttributes<HTMLDivElement>
@@ -27,10 +28,10 @@ const SideBar: React.FC = () => {
   const navigate = useNavigate()
   const [sideBarOpened, setSideBarOpened] = useAtom(sideBarOpenedAtom)
   return (
-    <aside
+    <ResizeTab
       className={clsx(
-        "group/sidebar transition-all   box-content h-[100vh] w-0  bg-gray-400/5  relative flex overflow-y-hidden  flex-col overflow-x-hidden text-ellipsis whitespace-nowrap ",
-        sideBarOpened && "w-[200px] py-1 px-2"
+        "group/sidebar bg-slate-500/5",
+        !sideBarOpened && "hidden"
       )}
     >
       <div className=" flex flex-col gap-2">
@@ -86,7 +87,7 @@ const SideBar: React.FC = () => {
           <span className="opacity-80">文件</span>
         </MenuItemContainer>
       </div>
-    </aside>
+    </ResizeTab>
   )
 }
 

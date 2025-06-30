@@ -1,7 +1,7 @@
 const token = import.meta.env.VITE_GITHUB_TOKEN;
-const repo = import.meta.env.VITE_GITHUB_REPO; // 填你的仓库 repo;
+const repo = import.meta.env.VITE_GITHUB_REPO;
 const baseUrl = import.meta.env.VITE_API_URL;
-export const imgToGitCloud = async (file: File) => {
+export const imgToGitCloud = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append("file", file);
   const reader = new FileReader();
@@ -23,7 +23,6 @@ export const imgToGitCloud = async (file: File) => {
 
   const content = await getBase64(file);
   const url = "https://api.github.com/repos/" + repo + "/contents/" + path;
-  console.log(content, url);
 
   const res = await fetch(url, {
     method: "put",
@@ -44,6 +43,7 @@ export const imgToGitCloud = async (file: File) => {
   } else {
     console.log(res);
     console.log("文件格式错误");
+    return "";
   }
 };
 
