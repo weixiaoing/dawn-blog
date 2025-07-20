@@ -23,20 +23,12 @@ export default function Home() {
     time: new Date(),
     watchedCount: 0,
   })
-  useEffect(() => {
-    fetch("http://localhost:4000/meeting/findByPage", {
-      method: "post",
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data.data.list)
-      })
-  }, [])
+
 
   useEffect(() => {
-    getWebData().then((res) => {
-      setInfo(res.data)
-    })
+    // getWebData().then((res) => {
+    //   setInfo(res.data)
+    // })
   }, [])
   return (
     <div className="p-2 space-y-4 max-w-[80%] mx-auto">

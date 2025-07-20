@@ -1,14 +1,10 @@
-export const successResponse = (res, data) => {
+import { Response } from "express";
+
+export const successResponse = (res:Response, data:any=null,message="success") => {
   res.json({
     code: 1,
-    message: "success",
+    message,
     data,
   });
 };
 
-// module.exports.errorResponse = (res, messagem) => {
-//   res.json({
-//     code: 0,
-//     message: error,
-//   });
-// };

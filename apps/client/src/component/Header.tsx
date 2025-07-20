@@ -17,7 +17,7 @@ export const Header = () => {
             setSideBarOpened(!sideBarOpened)
           }}
         >
-          <TbLayoutSidebarRightCollapse className="opacity-80" />
+          <TbLayoutSidebarRightCollapse size={22} />
         </button>
       )}
 

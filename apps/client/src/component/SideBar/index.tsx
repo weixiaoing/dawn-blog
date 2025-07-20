@@ -1,94 +1,91 @@
-import { TbLayoutSidebarLeftCollapse } from "react-icons/tb"
-import { BsDoorOpen } from "react-icons/bs"
-import { EditOutlined, LeftOutlined, LoginOutlined } from "@ant-design/icons"
-import clsx from "clsx"
-import { useAtom } from "jotai"
-import React, { FC, PropsWithChildren } from "react"
-import { useNavigate } from "react-router-dom"
-import { createPostAPI } from "../../api/post"
-import { sideBarOpenedAtom } from "../../store/atom/common"
-import PostMenu from "./PostMenu"
-import ResizeTab from "../ResizeTab"
+import clsx from "clsx";
+import { useAtom } from "jotai";
+import React, { FC, PropsWithChildren } from "react";
+import { TbLayoutSidebarLeftCollapse, TbWritingSign } from "react-icons/tb";
+import { useNavigate } from "react-router-dom";
+import { sideBarOpenedAtom } from "../../store/atom/common";
+import PostMenu from "./PostMenu";
+import ResizeTab from "./ResizeTab";
 
-const MenuItemContainer: FC<
+export const MenuItemContainer: FC<
   PropsWithChildren & React.HTMLAttributes<HTMLDivElement>
 > = ({ children, className, ...props }) => {
   return (
     <div
       {...props}
-      className={clsx("hover:bg-gray-400/15 rounded-sm p-2 ", className)}
+      className={clsx(
+        "hover:bg-normal/40  rounded-md px-2 py-1 cursor-pointer",
+        className
+      )}
       role="button"
     >
       {children}
     </div>
-  )
-}
+  );
+};
+
+export const IconButton: FC<
+  PropsWithChildren<React.HTMLAttributes<HTMLButtonElement>>
+> = ({ children, className, onClick, ...props }) => {
+  return (
+    <button
+      onClick={onClick}
+      className={clsx(
+        "rounded-md p-1 text-neutral-500 hover:bg-neutral-400/20 size-6 active:bg-neutral-400/40 flex items-center justify-center text-center ",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
 
 const SideBar: React.FC = () => {
-  const navigate = useNavigate()
-  const [sideBarOpened, setSideBarOpened] = useAtom(sideBarOpenedAtom)
+  const navigate = useNavigate();
+  const [sideBarOpened, setSideBarOpened] = useAtom(sideBarOpenedAtom);
   return (
     <ResizeTab
-      className={clsx(
-        "group/sidebar bg-slate-500/5",
-        !sideBarOpened && "hidden"
-      )}
+      className={clsx("group/sidebar px-3 bg-normal/30 py-2 font-medium ")}
     >
-      <div className=" flex flex-col gap-2">
-        <MenuItemContainer className="flex gap-2 justify-between cursor-default">
-          <button
+      <div className="h-full flex flex-col">
+        <MenuItemContainer className=" flex gap-2 justify-between ">
+          {/* <IconButton
+            className="size-8"
             onClick={() => {
-              localStorage.setItem("Expire", "")
-              navigate("/login")
+              navigate("/login");
             }}
-            className={clsx(
-              "h-6 w-6 rounded-sm hover:bg-neutral-300 flex items-center justify-center   text-center opacity-0 group-hover/sidebar:opacity-100"
-            )}
           >
-            <BsDoorOpen className="opacity-80" />
-          </button>
-          <div className=" flex gap-2">
-            <button
+            <BsDoorOpen className="size-full" />
+          </IconButton> */}
+          <div className="flex ">
+            <IconButton
+              className="size-8"
               onClick={() => {
-                setSideBarOpened(false)
+                setSideBarOpened(false);
               }}
-              className={clsx(
-                "h-6 w-6 rounded-sm hover:bg-neutral-300 flex items-center justify-center  text-center opacity-0 group-hover/sidebar:opacity-100"
-              )}
             >
-              <TbLayoutSidebarLeftCollapse className="opacity-80 " />
-            </button>
-            <button
-              onClick={async () => {
-                const res = await createPostAPI()
-                navigate(`/blog/${res.data.data._id}`)
-              }}
-              className={clsx(
-                "h-6 w-6 rounded-sm hover:bg-neutral-300  text-center opacity-0 group-hover/sidebar:opacity-100"
-              )}
-            >
-              <EditOutlined className="opacity-80" />
-            </button>
+              <TbLayoutSidebarLeftCollapse className="size-full" />
+            </IconButton>
+            <IconButton className="size-8">
+              <TbWritingSign className="size-full" />
+            </IconButton>
           </div>
         </MenuItemContainer>
-        <MenuItemContainer>
-          <header
-            className="opacity-80"
-            role="button"
-            onClick={() => navigate("/")}
-          >
-            仪表盘
-          </header>
-        </MenuItemContainer>
-
-        <PostMenu />
-
-        <MenuItemContainer onClickCapture={() => navigate("/file")}>
-          <span className="opacity-80">文件</span>
-        </MenuItemContainer>
+        <div className="flex mt-2 flex-col flex-1 gap-2 overflow-auto ">
+          <MenuItemContainer>
+            <header role="button" onClick={() => navigate("/")}>
+              仪表盘
+            </header>
+          </MenuItemContainer>
+          <PostMenu />
+          <MenuItemContainer onClickCapture={() => navigate("/file")}>
+            <span>文件</span>
+          </MenuItemContainer>
+        </div>
       </div>
     </ResizeTab>
-  )
-}
+  );
+};
 
-export default SideBar
+export default SideBar;

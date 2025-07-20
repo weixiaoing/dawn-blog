@@ -1,95 +1,151 @@
-import { RiAddFill } from "react-icons/ri"
+import { FileTextOutlined, RightOutlined } from "@ant-design/icons";
+import clsx from "clsx";
+import { useState } from "react";
+import { RiAddFill, RiDeleteBinLine } from "react-icons/ri";
+import { useNavigate } from "react-router-dom";
+
+import { useAtomValue } from "jotai";
 import {
-  DeleteOutlined,
-  FileAddOutlined,
-  FileTextOutlined,
-  RightOutlined,
-} from "@ant-design/icons"
-import clsx from "clsx"
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { createPostAPI, deletePostAPI, getList } from "../../api/post"
+  createPostAtom,
+  deleteSinglePostAtom,
+  postChildrenAtom,
+  rootPostsAtom,
+} from "../../store/atom/postAtom";
 
-const DropdownMenu = ({ display }: { display: React.ReactNode }) => {
-  const [open, setOpen] = useState(false)
-  const navigate = useNavigate()
-  const [data, setData] = useState<{ _id: string; title: string }[]>([])
+import { IconButton, MenuItemContainer } from ".";
+import { Post } from "../../api/post";
 
-  useEffect(() => {
-    getList().then((res) => {
-      setData(res)
-    })
-  }, [])
+function PostMenuItem({
+  post,
+  level = 0,
+  className,
+}: {
+  post: Post;
+  level?: number;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  // 获取当前节点的子文章
+  const {
+    data: children,
+    isLoading,
+    refetch,
+  } = useAtomValue(postChildrenAtom(post._id));
+  const { mutate: createPost } = useAtomValue(createPostAtom);
 
-  const ChildMenu = () => {
-    if (!data) return
-    return (
-      <ul className="ml-2">
-        {data.map((item) => (
-          <li
-            role="button"
-            onClick={() => {
-              navigate(`/blog/${item._id}`)
-            }}
-            key={item._id}
-            className="overflow-x-hidden group/item p-2 flex  hover:bg-gray-400/15 rounded-sm  "
-          >
-            <FileTextOutlined className="opacity-50" />
-            <span className="text-ellipsis ml-2 text-sm overflow-hidden whitespace-nowrap">
-              {item.title}
-            </span>
-
-            <div className="flex-1"></div>
-            <DeleteOutlined
-              onClick={async (e) => {
-                e.stopPropagation()
-                await deletePostAPI(item._id)
-                setData((v) => {
-                  return v?.filter((atom) => atom._id != item._id)
-                })
-              }}
-              className="opacity-0 group-hover/item:opacity-100"
-            />
-          </li>
-        ))}
-      </ul>
-    )
-  }
+  const { mutate: deletePost } = useAtomValue(deleteSinglePostAtom, {});
+  const createPostHandler = (parentId: string) => {
+    createPost(
+      { parentId },
+      {
+        onSuccess: (data, _, context) => {
+          // 假设data返回新建文章的_id
+          if (data && data._id) {
+            navigate(`/blog/${data._id}`);
+          }
+        },
+      }
+    );
+  };
+  const deletePostHandler = (postId: string) => {
+    deletePost({ postId, parentId: post.parentId });
+  };
   return (
-    <div className="transition-all duration-1000 flex flex-col max-h-[800px] overflow-auto ">
-      <header
-        role="button"
-        onClick={() => {
-          navigate("/table")
-        }}
-        className="flex rounded-sm p-2 text-opacity-80"
+    <div className={clsx(className, "mt-0.5")}>
+      <MenuItemContainer
+        style={{ paddingLeft: level * 8 }}
+        className="flex items-center group hover:bg-neutral-400/20 rounded-md"
       >
-        <span className=" px-1 rounded-sm hover:bg-neutral-300/40">
+        <IconButton>
+          <FileTextOutlined className="group-hover:hidden" />
           <RightOutlined
-            onClick={(e) => {
-              e.stopPropagation()
-              setOpen(!open)
+            onClick={() => {
+              refetch();
+              setOpen((v) => !v);
             }}
-            className={clsx(open && "rotate-90", "size-4 transition-all ")}
+            className={clsx(
+              "hidden group-hover:block transition-all",
+              open && "rotate-90"
+            )}
+            size={20}
           />
-        </span>
-        <span className="ml-2"> {display}</span>
-        <div className="flex-1"></div>
-        <button
-          className="hover:bg-black/10 rounded-sm p-1"
-          onClick={async (e) => {
-            e.stopPropagation()
-            const res = await createPostAPI()
-            navigate(`/blog/${res.data.data._id}`)
-          }}
+        </IconButton>
+        <span
+          className="ml-1 flex-1 truncate cursor-pointer"
+          onClick={() => navigate(`/blog/${post._id}`)}
         >
-          <RiAddFill className="opacity-50 size-full hover:opacity-100" />
-        </button>
-      </header>
-      {open && <ChildMenu />}
+          {post.title}
+        </span>
+
+        <IconButton
+          className="hidden group-hover:block size-6"
+          onClick={() => deletePostHandler(post._id)}
+        >
+          <RiDeleteBinLine className="size-full" />
+        </IconButton>
+        <IconButton
+          className="hidden group-hover:block size-6"
+          onClick={() => createPostHandler(post._id)}
+        >
+          <RiAddFill className="size-full" />
+        </IconButton>
+      </MenuItemContainer>
+      {open && (
+        <div>
+          {isLoading ? (
+            <div className="ml-4 text-xs text-gray-400">加载中...</div>
+          ) : children && children?.length > 0 ? (
+            children?.map((child) => (
+              <PostMenuItem key={child._id} post={child} level={level + 1} />
+            ))
+          ) : (
+            <div className="ml-8 text-gray-400 py-1">暂无文章</div>
+          )}
+        </div>
+      )}
     </div>
-  )
+  );
 }
+
+// 根菜单
 export default function PostMenu() {
-  return <DropdownMenu display={<span>文章</span>}></DropdownMenu>
+  const { data: rootPosts, refetch, isLoading } = useAtomValue(rootPostsAtom);
+  const { mutate: createPost } = useAtomValue(createPostAtom);
+  const [open, setOpen] = useState(false);
+  const createPostHandler = (parentId?: string) => {
+    createPost({ parentId });
+  };
+  return (
+    <div className="text-neutral-800 ">
+      <MenuItemContainer
+        onClick={() => {
+          refetch();
+          setOpen((v) => !v);
+        }}
+        className="flex items-center group"
+      >
+        <span>文章</span>
+        {/* 根级添加/搜索按钮 */}
+        <div className="ml-auto hidden group-hover:block">
+          <IconButton
+            onClick={(e) => {
+              e.stopPropagation();
+              createPostHandler();
+            }}
+          >
+            <RiAddFill />
+          </IconButton>
+        </div>
+      </MenuItemContainer>
+      {isLoading && <div>loading</div>}
+      {open && (
+        <div>
+          {rootPosts?.map((post) => (
+            <PostMenuItem key={post._id} post={post} level={1} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }

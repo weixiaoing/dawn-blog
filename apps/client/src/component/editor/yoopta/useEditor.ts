@@ -1,6 +1,5 @@
 import { createYooptaEditor } from "@yoopta/editor";
 import { useCallback, useMemo, useState } from "react";
-import { Editor } from "slate";
 import { updatePost } from "../../../api/post";
 
 type EditorStatusType = "loading" | "success" | "error"

@@ -12,6 +12,7 @@ const postSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+
   //   标签
   tags: {
     type: [String],
@@ -39,14 +40,6 @@ const postSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
-  date: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
   cover: {
     type: String,
     default: "",
@@ -58,6 +51,22 @@ const postSchema = new mongoose.Schema({
       default: null,
     },
   ],
+  parentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Post",
+    default: null,
+  },
+  date: {
+    type: Date,
+    default: Date.now(),
+  },
+  // 新增：自定义属性
+  meta: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {},
+  },
+}, {
+  timestamps: true,
 });
 
-export default mongoose.model("Post", postSchema, "post");
+export default mongoose.model("Post", postSchema);

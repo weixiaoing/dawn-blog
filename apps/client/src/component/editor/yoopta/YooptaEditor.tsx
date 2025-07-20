@@ -1,40 +1,37 @@
-import YooptaEditor, {
-  createYooptaEditor,
-  YooEditor,
-  YooptaContentValue,
-  YooptaOnChangeOptions,
-} from "@yoopta/editor"
 import ActionMenuList, {
   DefaultActionMenuRender,
-} from "@yoopta/action-menu-list"
-import Image from "@yoopta/image"
-import Paragraph from "@yoopta/paragraph"
-import parse from "@yoopta/exports"
-import Embed from "@yoopta/embed"
-import Link from "@yoopta/link"
-import File from "@yoopta/file"
-import { NumberedList, BulletedList, TodoList } from "@yoopta/lists"
+} from "@yoopta/action-menu-list";
+import Code from "@yoopta/code";
+import YooptaEditor, {
+  createYooptaEditor,
+  YooptaContentValue,
+} from "@yoopta/editor";
+import Embed from "@yoopta/embed";
+import { markdown } from "@yoopta/exports";
+import File from "@yoopta/file";
+import { HeadingOne, HeadingThree, HeadingTwo } from "@yoopta/headings";
+import Image from "@yoopta/image";
+import Link from "@yoopta/link";
+import { BulletedList, NumberedList, TodoList } from "@yoopta/lists";
 import {
   Bold,
-  Italic,
   CodeMark,
-  Underline,
-  Strike,
   Highlight,
-} from "@yoopta/marks"
-import { HeadingOne, HeadingThree, HeadingTwo } from "@yoopta/headings"
-import Code from "@yoopta/code"
-import Table from "@yoopta/table"
+  Italic,
+  Strike,
+  Underline,
+} from "@yoopta/marks";
+import Paragraph from "@yoopta/paragraph";
+import Table from "@yoopta/table";
 
-import { useCallback, useMemo, useRef, useState } from "react"
-import { imgToGitCloud } from "../../../api/imageUpload"
-import UploadItem from "../../upload/UploadItem"
+import { useEffect, useMemo, useRef, useState } from "react";
+import { imgToGitCloud } from "../../../api/imageUpload";
 const plugins = [
   Paragraph,
   Image.extend({
     options: {
       async onUpload(file) {
-        const res = await imgToGitCloud(file)
+        const res = await imgToGitCloud(file);
         return {
           src: res,
           alt: file.name,
@@ -42,7 +39,7 @@ const plugins = [
             width: 500,
             height: 500,
           },
-        }
+        };
       },
     },
   }),
@@ -57,44 +54,43 @@ const plugins = [
   Link,
   File,
   Table,
-]
-
-const marks = [Bold, Italic, CodeMark, Underline, Strike, Highlight]
-
+];
+const marks = [Bold, Italic, CodeMark, Underline, Strike, Highlight];
 const TOOLS = {
   ActoinMenu: {
     render: DefaultActionMenuRender,
     tool: ActionMenuList,
   },
-}
+};
 
 export default function CustomEditor({
-  editor,
   defaultValue,
+  // editor,
   onChange,
 }: {
-  editor: YooEditor
-  defaultValue?: string
-  onChange?: (value: string) => void
+  defaultValue?: string;
+  onChange?: (value: string) => void;
 }) {
-  const [value, setValue] = useState<YooptaContentValue>(() => {
-    return parse.markdown.deserialize(editor, defaultValue || "")
-  })
-  const selectionRef = useRef(null)
+  const editor = useMemo(() => createYooptaEditor(), []);
+  const [value, setValue] = useState<YooptaContentValue>();
+  const deserializeMarkdown = (markdownString: string) => {
+    const value = markdown.deserialize(editor, markdownString);
+    setValue(value);
+  };
+  useEffect(() => {
+    deserializeMarkdown(defaultValue || "");
+  }, [defaultValue]);
+  const onChangeHandler = () => {
+    onChange?.(markdown.serialize(editor, editor.getEditorValue()));
+  };
 
-  const onChangeHandler = (
-    value: YooptaContentValue,
-    options: YooptaOnChangeOptions
-  ) => {
-    onChange?.(parse.markdown.serialize(editor, value))
-    setValue(value)
-  }
+  const selectionRef = useRef(null);
 
   return (
     <div className="min-h-[500px] " ref={selectionRef}>
       <YooptaEditor
+        key={value}
         width={"100%"}
-        style={{ paddingBottom: "300px" }}
         editor={editor}
         placeholder="Type text.."
         value={value}
@@ -102,10 +98,10 @@ export default function CustomEditor({
         marks={marks}
         selectionBoxRoot={selectionRef}
         autoFocus
-        // custome
+        custome
         tools={TOOLS}
         plugins={plugins}
       />
     </div>
-  )
+  );
 }

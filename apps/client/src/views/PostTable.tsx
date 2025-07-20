@@ -94,28 +94,28 @@ export default function PostTable() {
   ];
 
   const deletePost = async (_id: any) => {
-    return deletePostAPI(_id).then((res) => {
-      console.log(res);
-      getList().then((res) => {
-        setData(res);
-      });
-    });
+    // return deletePostAPI(_id).then((res) => {
+    //   console.log(res);
+    //   getList().then((res) => {
+    //     setData(res);
+    //   });
+    // });
   };
 
   const createPost = async () => {
-    return createPostAPI().then((res) => {
-      console.log(res.data.data._id);
-      getList().then((res) => {
-        setData(res);
-      });
-      return res.data.data._id;
-    });
+    // return createPostAPI().then((res) => {
+    //   console.log(res.data.data._id);
+    //   getList().then((res) => {
+    //     setData(res);
+    //   });
+    //   return res.data.data._id;
+    // });
   };
 
   useEffect(() => {
-    getList().then((res) => {
-      setData(res);
-    });
+    // getList().then((res) => {
+    //   setData(res);
+    // });
   }, []);
   const navigate = useNavigate();
   return (
